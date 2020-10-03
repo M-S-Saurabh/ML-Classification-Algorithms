@@ -1,26 +1,9 @@
 
 import sys
 import numpy as np
-from Utils import digits, cross_validation
+from Utils import digits, cross_validation, multivariate_gaussian_pdf
 import matplotlib.pyplot as plt
 import itertools
-
-def multivariate_gaussian_pdf(x, mu, cov):
-    '''
-    Taken from: https://stackoverflow.com/a/23101179
-    
-    Caculate the multivariate normal density (pdf)
-    Keyword arguments:
-        x = numpy array of a "d x 1" sample vector
-        mu = numpy array of a "d x 1" mean vector
-        cov = "numpy array of a d x d" covariance matrix
-    '''
-    D = len(mu)
-    mu = mu.reshape(D, 1)
-    x = x.reshape(D, 1)
-    part1 = 1 / ( ((2* np.pi)**(D/2)) * (np.linalg.det(cov)**(1/2)) )
-    part2 = (-0.5 * ((x-mu).T @ np.linalg.inv(cov) @ (x-mu)).real[0][0] )
-    return float(part1 * np.exp(part2))
 
 unique = itertools.count()
 def visualize2D(X, Y, Y_unique):
@@ -64,7 +47,7 @@ def LDA2d(X_train, Y_train, X_test):
     X_train_new = X_train @ A # Nx2 matrix
 
     # Visualize training set in 2D space.
-    visualize2D(X_train_new, Y_train, Y_unique)
+    # visualize2D(X_train_new, Y_train, Y_unique)
 
     means, covariances = [], []
     # MLE of the Gaussians which fits each class
@@ -81,6 +64,7 @@ def LDA2d(X_train, Y_train, X_test):
     return train_preds, preds
 
 if __name__ == "__main__":
+    num_crossval=10
     if(len(sys.argv) > 1): 
         try:
             num_crossval = int(sys.argv[1])
@@ -88,6 +72,6 @@ if __name__ == "__main__":
             print("Correct way to use arguments is: 'python LDA2dGaussGM.py 5'")
             sys.exit(1)
     print("Running 2-D LDA on Digits dataset...")
-    train_errors, test_errors = cross_validation(LDA2d, digits[0], digits[1])
-    print("Training Error mean:", np.mean(train_errors), " std:",np.var(train_errors) ** 0.5)
-    print("Testing Error mean:", np.mean(test_errors), " std:",np.var(test_errors) ** 0.5)
+    train_errors, test_errors = cross_validation(LDA2d, digits[0], digits[1], num_crossval=num_crossval)
+    print("Training Error mean:{:.2f}% std:{:.2f}%".format(np.mean(train_errors)*100, np.std(train_errors) ))
+    print("Testing Error mean:{:.2f}% std:{:.2f}%".format(np.mean(test_errors)*100, np.std(test_errors) ))

@@ -1,22 +1,24 @@
-from sklearn.datasets import load_iris
-from Utils import make_80_20_splits
-from logisticRegression import logisticReg
-from sklearn.linear_model import LogisticRegression
 import numpy as np
+import matplotlib.pyplot as plt
 
-X, Y = load_iris(return_X_y=True)
-X = X[(Y==0) | (Y == 1)]
-Y = Y[(Y==0) | (Y == 1)]
+def plotErrors(errors, train_percent):
+    means = np.mean(errors, axis=0)
+    std = np.std(errors, axis=0)
+    plt.figure()
+    plt.errorbar(train_percent, means, yerr=std, fmt='o-', ecolor='r')
+    plt.xlabel('Training data percentage')
+    plt.ylabel('Test set error rate')
+    plt.show()
 
-train_indices, test_indices = make_80_20_splits(Y)
-X_train, Y_train = X[train_indices], Y[train_indices]
-X_test, Y_test = X[test_indices], Y[test_indices]
-
-error_pc = logisticReg(X_train, Y_train, X_test, Y_test, minibatch=1, learning_rate=5e-2, iterations=2000)
-print("Mine:", error_pc)
-
-clf = LogisticRegression(random_state=0).fit(X_train, Y_train)
-preds = clf.predict(X_test)
-print("All:", np.all(preds == Y_test))
-error_rate = np.count_nonzero(preds != Y_test) / len(Y_test)
-print("SKLearn:",error_rate)
+if __name__ == "__main__":
+    errors = np.array([[0.25490196, 0.23529412, 0.25490196, 0.25490196, 0.2254902],
+ [0.23529412, 0.23529412, 0.2254902, 0.24509804, 0.2254902],
+ [0.32352941, 0.2254902, 0.20588235, 0.20588235, 0.19607843],
+ [0.33333333, 0.30392157, 0.31372549, 0.31372549, 0.32352941],
+ [0.2254902, 0.2254902, 0.24509804, 0.2254902, 0.20588235],
+ [0.2254902, 0.23529412, 0.21568627, 0.20588235, 0.2254902],
+ [0.23529412, 0.2254902, 0.23529412, 0.20588235, 0.21568627],
+ [0.30392157, 0.26470588, 0.26470588, 0.23529412, 0.23529412],
+ [0.28431373, 0.25490196, 0.26470588, 0.28431373, 0.26470588],
+ [0.31372549, 0.25490196, 0.24509804, 0.2745098, 0.2745098]])
+    plotErrors(errors, [10,25,50,75,100])

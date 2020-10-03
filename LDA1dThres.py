@@ -1,13 +1,7 @@
 
 import sys
 import numpy as np
-from Utils import boston_50, cross_validation
-import matplotlib.pyplot as plt
-
-def gaussian_pdf(mean, var, x):
-    num = np.exp(-0.5 * (x-mean)**2 / var)
-    den = (2 * np.pi * var) ** 0.5
-    return (num / den)
+from Utils import boston_50, cross_validation, gaussian_pdf
 
 def LDA1d(X_train, Y_train, X_test):
     D = X_train.shape[1]
@@ -37,10 +31,10 @@ def LDA1d(X_train, Y_train, X_test):
     u1 = X1_new.mean(); v1 = np.var(X1_new)
 
     X_train_new = (X_train @ A).reshape(len(X_train),)
-    train_preds = np.array([(gaussian_pdf(u0, v0, x) < gaussian_pdf(u1, v1, x)) for x in X_train_new])
+    train_preds = np.array([(gaussian_pdf(x, u0, v0) < gaussian_pdf(x, u1, v1)) for x in X_train_new])
 
     X_test_new = (X_test @ A).reshape(len(X_test),)
-    Y_test = np.array([(gaussian_pdf(u0, v0, x) < gaussian_pdf(u1, v1, x)) for x in X_test_new])
+    Y_test = np.array([(gaussian_pdf(x, u0, v0) < gaussian_pdf(x, u1, v1)) for x in X_test_new])
     return train_preds, Y_test
 
 if __name__ == "__main__":
@@ -53,5 +47,5 @@ if __name__ == "__main__":
             sys.exit(1)
     print("Running 1-D LDA on Boston-50 dataset...")
     train_errors, test_errors = cross_validation(LDA1d, boston_50[0], boston_50[1], num_crossval=num_crossval)
-    print("Training Error mean:", np.mean(train_errors), " std:", np.var(train_errors) ** 0.5)
-    print("Testing Error mean:", np.mean(test_errors), " std:", np.var(test_errors) ** 0.5)
+    print("Training Error mean:{:.2f}% std:{:.2f}%".format(np.mean(train_errors)*100, np.std(train_errors) ))
+    print("Testing Error mean:{:.2f}% std:{:.2f}%".format(np.mean(test_errors)*100, np.std(test_errors) ))
